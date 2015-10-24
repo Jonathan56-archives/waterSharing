@@ -8,14 +8,9 @@
     <meta name="author" content="">
 
     <title>V2G-Sim</title>
-
-    <!-- Bootstrap Core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link href="css/simple-sidebar.css" rel="stylesheet">
     <!-- d3 -->
     <script type="text/javascript" src="js/d3.js"></script>
-    <script type="text/javascript" src="js/dimple.v2.1.6.js"></script>
+
 </head>
 <style>
 svg {
@@ -61,7 +56,7 @@ svg {
             <div class="container" id="chartContainer1"></div>
             <script type="text/javascript">           
             var margin = {top: 30, right: 10, bottom: 10, left: 10},
-                width = 960 - margin.left - margin.right,
+                width = 1300 - margin.left - margin.right,
                 height = 500 - margin.top - margin.bottom;
 
             var x = d3.scale.ordinal().rangePoints([0, width], 1),
@@ -79,7 +74,7 @@ svg {
               .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            d3.csv("cars.csv", function(error, cars) {
+            d3.csv("data.csv", function(error, cars) {
 
               // Extract the list of dimensions and create a scale for each.
               x.domain(dimensions = d3.keys(cars[0]).filter(function(d) {
@@ -194,13 +189,6 @@ svg {
     <script src="js/jquery.js"></script>
     <!-- Bootstrap Core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
-    <!-- Menu Toggle Script -->
-    <script>
-    $("#menu-toggle").click(function(e) {
-        e.preventDefault();
-        $("#wrapper").toggleClass("toggled");
-    });
-    </script>
 
 </body>
 
