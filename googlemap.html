@@ -7,11 +7,10 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>V2G-Sim</title>
+    <title>Water Cal</title>
     <!-- d3 -->
     <script type="text/javascript" src="js/d3.js"></script>
-
-    <style type="text/css">
+<style type="text/css">
 svg {
   font: 10px sans-serif;
 }
@@ -45,18 +44,9 @@ svg {
   cursor: move;
 }
 
-/*html, body, #map {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}*/
-
 #map {
-  width: 1300px;
-  height: 600px;
+  height: 100%;
 }
-
 
 #floating-panel {
   position: absolute;
@@ -83,60 +73,15 @@ svg {
 }
 
 </style>
-
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization">
-</script>
-
-<script>
-  var map, heatmap;
-
-  function initialize() {
-
-    map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 5,
-    center: {lat: 37.775, lng: -122.434},
-    mapTypeId: google.maps.MapTypeId.TERRAIN
-  });
-    var fulldata;
-    var town = [];
-    d3.csv("latlongclean.csv", function(data) {
-
-    fulldata = data;
-    data.forEach(function(d) {
-        d.name = d.name;
-        d.lat = parseFloat(d.lat);
-        d.long = parseFloat(d.long);
-      });
-
-        data.forEach(function(d){
-         town.push(new google.maps.LatLng(d.lat, d.long))
-      });
-
-      heatmap = new google.maps.visualization.HeatmapLayer({
-      data: town,
-      map: map
-    });
-
-      heatmap.set('radius', 30)
-      heatmap.set('opacity', 1)
-
-    });
-
-  }
-
-  google.maps.event.addDomListener(window, 'load', initialize);
-
-</script>
 </head>
 
+<body id="body">
+     <!-- Page Content -->
 
-<body>
-    <!-- Page Content -->
-    <div id="page-content-wrapper">
-        <div class="container-fluid">      
-          <div class="container" id="chartContainer1"></div>
-          <div id="map"></div>
-          <script type="text/javascript">           
+    <div id="map"></div>
+<!--    
+    <script type="text/javascript">
+
             var margin = {top: 30, right: 10, bottom: 10, left: 10},
                 width = 1300 - margin.left - margin.right,
                 height = 500 - margin.top - margin.bottom;
@@ -151,7 +96,7 @@ svg {
                 foreground;
 
             var map;
-            var heatmap, binList;
+            var heatmap;
             var town = new Array();
 
             var svg = d3.select("#chartContainer1").append("svg")
@@ -190,31 +135,31 @@ svg {
                   .data(dimensions)
                 .enter().append("g")
                   .attr("class", "dimension")
-                  .attr("transform", function(d) { return "translate(" + x(d) + ")"; });
-                  // .call(d3.behavior.drag()
-                  //   .origin(function(d) { return {x: x(d)}; })
-                  //   .on("dragstart", function(d) {
-                  //     dragging[d] = x(d);
-                  //     background.attr("visibility", "hidden");
-                  //   })
-                  //   .on("drag", function(d) {
-                  //     dragging[d] = Math.min(width, Math.max(0, d3.event.x));
-                  //     foreground.attr("d", path);
-                  //     dimensions.sort(function(a, b) { return position(a) - position(b); });
-                  //     x.domain(dimensions);
-                  //     g.attr("transform", function(d) { return "translate(" + position(d) + ")"; })
-                  //   })
-                  //   .on("dragend", function(d) {
-                  //     delete dragging[d];
-                  //     transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")");
-                  //     transition(foreground).attr("d", path);
-                  //     background
-                  //         .attr("d", path)
-                  //       .transition()
-                  //         .delay(500)
-                  //         .duration(0)
-                  //         .attr("visibility", null);
-                  //   }));
+                  .attr("transform", function(d) { return "translate(" + x(d) + ")"; })
+                  .call(d3.behavior.drag()
+                    .origin(function(d) { return {x: x(d)}; })
+                    .on("dragstart", function(d) {
+                      dragging[d] = x(d);
+                      background.attr("visibility", "hidden");
+                    })
+                    .on("drag", function(d) {
+                      dragging[d] = Math.min(width, Math.max(0, d3.event.x));
+                      foreground.attr("d", path);
+                      dimensions.sort(function(a, b) { return position(a) - position(b); });
+                      x.domain(dimensions);
+                      g.attr("transform", function(d) { return "translate(" + position(d) + ")"; })
+                    })
+                    .on("dragend", function(d) {
+                      delete dragging[d];
+                      transition(d3.select(this)).attr("transform", "translate(" + x(d) + ")");
+                      transition(foreground).attr("d", path);
+                      background
+                          .attr("d", path)
+                        .transition()
+                          .delay(500)
+                          .duration(0)
+                          .attr("visibility", null);
+                    }));
 
               // Add an axis and title.
               g.append("g")
@@ -229,13 +174,13 @@ svg {
               g.append("g")
                   .attr("class", "brush")
                   .each(function(d) {
-                    d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brushstart", brushstart).on("brush", brush).on("brushend", brushend)); 
+                    d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brushstart", brushstart).on("brush", brush));
                   })
                 .selectAll("rect")
                   .attr("x", -8)
                   .attr("width", 16);
             });
-          
+
             // # Functions
             function position(d) {
               var v = dragging[d];
@@ -257,66 +202,34 @@ svg {
 
             // Handles a brush event, toggling the display of foreground lines.
             function brush() {
-              binList = [];
               var actives = dimensions.filter(function(p) { return !y[p].brush.empty(); }),
                   extents = actives.map(function(p) { return y[p].brush.extent(); });
               foreground.style("display", function(d) {
-                if (actives.every(function(p, i) { return extents[i][0] <= y[p](d[p]) && y[p](d[p]) <= extents[i][1]; })) { 
-                  binList.push(d.name);
-                  return null;
-                }
-                else {
-                  return "none";
-                }
-              });   
+                return actives.every(function(p, i) {
+                  return extents[i][0] <= d[p] && d[p] <= extents[i][1];
+                }) ? null : "none";
+              });
             }
+    </script>
+-->
+    <script type="text/javascript">
 
-            function brushend() {
-              console.log(binList);
-            }
+    var map;
+    function initMap() {
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: -34.397, lng: 150.644},
+        zoom: 8
+      });
+    }
 
-
-
-            // function initMap() {
-            //   map = new google.maps.Map(document.getElementById('map'), {
-            //     zoom: 13,
-            //     center: {lat: 37.775, lng: -122.434},
-            //     mapTypeId: google.maps.MapTypeId.SATELLITE
-            //   });
-
-            //   heatmap = new google.maps.visualization.HeatmapLayer({
-            //     data: location,
-            //     map: map
-            //   });
-            // }
-
-            // function initMapData() {
-            //   d3.csv("latlongclean.csv", function(data) {
-
-            //     data.forEach(function(d) {
-            //       d.name = +d.name;
-            //       d.lat = +d.lat;
-            //       d.long = +d.long;
-            //     });
-
-            //   // data.forEach(function(d){
-            //   //    town.push(new google.maps.LatLng(d.lat, d.long))
-            //   // });
-
-            //   console.log(town)
-            //   // initMap();
-            //   });
-            // }
-
-          </script>
-        </div>
-    </div>
-    <!-- /#page-content-wrapper -->
+    </script>
 
 
     <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
 
-    <script src="js/bootstrap.min.js"></script>  
-</body>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB_11DS4hBlcbqAfLBWN8Cs0FgY0QUqn8U&callback=initMap"
+        async defer></script>
 
+  </body>
 </html>
