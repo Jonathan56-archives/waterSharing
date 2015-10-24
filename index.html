@@ -88,43 +88,7 @@ svg {
 </script>
 
 <script>
-  var map, heatmap;
 
-  function initialize() {
-
-    map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 5,
-    center: {lat: 37.775, lng: -122.434},
-    mapTypeId: google.maps.MapTypeId.TERRAIN
-  });
-    var fulldata;
-    var town = [];
-    d3.csv("latlongclean.csv", function(data) {
-
-    fulldata = data;
-    data.forEach(function(d) {
-        d.name = d.name;
-        d.lat = parseFloat(d.lat);
-        d.long = parseFloat(d.long);
-      });
-
-        data.forEach(function(d){
-         town.push(new google.maps.LatLng(d.lat, d.long))
-      });
-
-      heatmap = new google.maps.visualization.HeatmapLayer({
-      data: town,
-      map: map
-    });
-
-      heatmap.set('radius', 30)
-      heatmap.set('opacity', 1)
-
-    });
-
-  }
-
-  google.maps.event.addDomListener(window, 'load', initialize);
 
 </script>
 </head>
@@ -136,7 +100,56 @@ svg {
         <div class="container-fluid">      
           <div class="container" id="chartContainer1"></div>
           <div id="map"></div>
-          <script type="text/javascript">           
+          <script type="text/javascript">
+
+            var map, heatmap;
+
+            function initialize() {
+
+              map = new google.maps.Map(document.getElementById('map'), {
+              zoom: 5,
+              center: {lat: 37.775, lng: -122.434},
+              mapTypeId: google.maps.MapTypeId.TERRAIN
+            });
+              var town = [];
+              var fulldata;
+
+
+              d3.csv("latlongclean.csv", function(data) {
+
+              fulldata = data;
+              data.forEach(function(d) {
+                  d.name = d.name;
+                  d.lat = parseFloat(d.lat);
+                  d.long = parseFloat(d.long);
+                });
+
+                  data.forEach(function(d){
+                   town.push(new google.maps.LatLng(d.lat, d.long))
+                });
+
+                heatmap = new google.maps.visualization.HeatmapLayer({
+                data: town,
+                map: map
+              });
+
+                heatmap.set('radius', 30)
+                heatmap.set('opacity', 1)
+
+              });
+
+            }
+
+            google.maps.event.addDomListener(window, 'load', initialize);
+
+
+
+
+
+
+
+
+
             var margin = {top: 30, right: 10, bottom: 10, left: 10},
                 width = 1300 - margin.left - margin.right,
                 height = 500 - margin.top - margin.bottom;
@@ -162,6 +175,21 @@ svg {
 
             d3.csv("data.csv", function(error, cars) {
 
+              cars.forEach(function(d) {
+                                // d.waterRationing = parseFloat(d.waterRationing);
+                                // d.waterConsumption = parseFloat(d.waterConsumption);
+                                // d.waterRationningPerCapita = parseFloat(d.waterRationningPerCapita);
+                                // d.waterConsumptionPerCapita = parseFloat(d.waterConsumptionPerCapita);
+                                // d.droughtIndex = parseFloat(d.droughtIndex);
+                                // d.groundWaterLevel = parseFloat(d.groundWaterLevel);
+                                // d.agroWorker = parseFloat(d.agroWorker);
+                                // d.averageIncome = parseFloat(d.averageIncome);
+                                // d.householdSize = parseFloat(d.householdSize);
+                                // d.GINIIndex = parseFloat(d.GINIIndex);
+                                // d.race = parseFloat(d.race);
+                                d.visible = false
+                              });
+              bindata = cars;
               // Extract the list of dimensions and create a scale for each.
               x.domain(dimensions = d3.keys(cars[0]).filter(function(d) {
                 return d != "name" && (y[d] = d3.scale.linear()
@@ -183,7 +211,8 @@ svg {
                 .selectAll("path")
                   .data(cars)
                 .enter().append("path")
-                  .attr("d", path);
+                  .attr("d", path)
+                  .style('stroke-width', '1.5');
 
               // Add a group element for each dimension.
               var g = svg.selectAll(".dimension")
@@ -228,51 +257,70 @@ svg {
               // Add and store a brush for each axis.
               g.append("g")
                   .attr("class", "brush")
-                  .each(function(d) {
-                    d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brushstart", brushstart).on("brush", brush).on("brushend", brushend)); 
-                  })
+                  .each(function(d) { d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brush", brush).on("brushend", brushend)); })
                 .selectAll("rect")
                   .attr("x", -8)
                   .attr("width", 16);
             });
           
-            // # Functions
-            function position(d) {
-              var v = dragging[d];
-              return v == null ? x(d) : v;
-            }
+            // // # Functions
+            // function position(d) {
+            //   var v = dragging[d];
+            //   return v == null ? x(d) : v;
+            // }
 
-            function transition(g) {
-              return g.transition().duration(500);
-            }
+            // function transition(g) {
+            //   return g.transition().duration(500);
+            // }
 
-            // Returns the path for a given data point.
+            // // Returns the path for a given data point.
+            // function path(d) {
+            //   return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
+            // }
             function path(d) {
-              return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
+              return line(dimensions.map(function(p) { return [x(p), y[p](d[p])]; }));
             }
 
-            function brushstart() {
-              d3.event.sourceEvent.stopPropagation();
-            }
+            // function brushstart() {
+            //   d3.event.sourceEvent.stopPropagation();
+            // }
 
             // Handles a brush event, toggling the display of foreground lines.
             function brush() {
-              binList = [];
-              var actives = dimensions.filter(function(p) { return !y[p].brush.empty(); }),
-                  extents = actives.map(function(p) { return y[p].brush.extent(); });
+              var actives = dimensions.filter(function(p) { return !y[p].brush.empty(); });
+              var extents = actives.map(function(p) { return y[p].brush.extent(); });
+              // console.log(extents)
               foreground.style("display", function(d) {
-                if (actives.every(function(p, i) { return extents[i][0] <= y[p](d[p]) && y[p](d[p]) <= extents[i][1]; })) { 
-                  binList.push(d.name);
-                  return null;
-                }
-                else {
-                  return "none";
-                }
-              });   
+                bool = actives.every(function(p, i) {
+                  return extents[i][0] <= d[p] && d[p] <= extents[i][1];
+                }) ? null : "none";
+                d.visible = bool;
+                return bool;
+              }); 
             }
 
             function brushend() {
+              binList = [];
+              bindata.forEach(function(d) {
+                if (d.visible) {
+                  binList.push(d.name);
+                }
+              });
               console.log(binList);
+
+                fulldata.forEach(function(d){
+                  bindata.every(function(d2){ if (d2.name = d.name))
+                  
+                   town.push(new google.maps.LatLng(d.lat, d.long))
+                });
+
+                heatmap = new google.maps.visualization.HeatmapLayer({
+                data: town,
+                map: map
+              });
+
+                heatmap.set('radius', 30)
+                heatmap.set('opacity', 1)
             }
 
 
