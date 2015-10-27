@@ -3,7 +3,7 @@ import numpy
 
 nbOfRow = 20
 
-header = ['name', 'waterRationing', 'waterConsumption', 'waterRationningPerCapita',
+header = ['name', 'lat', 'long', 'waterRationing', 'waterConsumption', 'waterRationningPerCapita',
  		'waterConsumptionPerCapita', 'droughtIndex', 'groundWaterLevel', 'agroWorker',
   		'averageIncome', 'householdSize', 'GINIIndex', 'race']
 
